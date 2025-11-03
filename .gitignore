@@ -1,0 +1,26 @@
+<<<<<<< HEAD
+
+=======
+# Python
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+venv/
+venv*/
+
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__/
+db.sqlite3
+/staticfiles/
+media/
+
+# NLTK cache (optional)
+nltk_data/
+assets/
+
+images/
+>>>>>>> 425b3f2 (Update .gitignore to exclude virtual environment and cache files)
