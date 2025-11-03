@@ -1,0 +1,1 @@
+default_app_config = 'A2SL.apps.A2SLConfig'

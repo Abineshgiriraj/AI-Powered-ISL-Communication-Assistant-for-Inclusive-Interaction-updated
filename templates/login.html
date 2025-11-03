@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="signup-container">
+    <h1 class="signup-title">Log in</h1>
+    <form class="signup-form" action="." method="post" novalidate>
+        {% csrf_token %}
+        <div>
+            <label for="{{ form.username.id_for_label }}">Username:</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+              <div class="form-errors">{{ form.username.errors.0 }}</div>
+            {% endif %}
+        </div>
+        <div>
+            <label for="{{ form.password.id_for_label }}">Password:</label>
+            {{ form.password }}
+            {% if form.password.errors %}
+              <div class="form-errors">{{ form.password.errors.0 }}</div>
+            {% endif %}
+        </div>
+        {% if request.GET.next %}
+          <input type="hidden" name="next" value="{{ request.GET.next }}">
+        {% endif %}
+        <button type="submit" class="signup-btn">Log in</button>
+    </form>
+</div>
+{% endblock %}

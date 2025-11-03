@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="split-container">
+
+  <!-- Left: text & input -->
+  <div class="split left">
+    <h2 align="center">Enter Text or Use Mic</h2>
+    <form action="" method="post">
+      {% csrf_token %}
+      <input type="text" name="sen" class="mytext" id="speechToText" placeholder="">
+      <button type="button" class="mic" onclick="record()">
+        <img src="{% static 'mic3.png' %}" height="20" width="30" />
+      </button>
+      <input type="submit" name="submit" class="submit">
+    </form>
+    <br>
+
+    <table cellspacing="20px">
+      <tr>
+        <td class="td">The text that you entered is:</td>
+        <td class="td">{{ text }}</td>
+      </tr>
+      <tr>
+        <td class="td">Key words in sentence:</td>
+        <td class="td">
+          <ul class="td" id="list">
+            {% for word in words %}
+              <li id="{{ i }}">{{ word }}</li>
+            {% endfor %}
+          </ul>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <!-- Right: video -->
+  <div class="split right">
+    <h2>Sign Language Animation</h2>
+    <video id="videoPlayer" width="600" height="350" preload="auto" autoplay>
+      <source src="" type="video/mp4">
+      Your browser does not support HTML5 video.
+    </video>
+    <br><br>
+    <button class="submit" onclick="playPause()">Play/Pause</button>
+  </div>
+
+</div>
+
+<script>
+  // Speech to text
+  function record(){
+    var recognition = new webkitSpeechRecognition();
+    recognition.lang='en-IN';
+    recognition.onresult = function(event){
+      document.getElementById('speechToText').value = event.results[0][0].transcript;
+    }
+    recognition.start();
+  }
+
+  // Play video sequence
+  function play() {
+    var videoSource = [];
+    var videos = document.getElementById("list").getElementsByTagName("li");
+    for (let j = 0; j < videos.length; j++) {
+      videoSource[j] = "/static/" + videos[j].innerHTML + ".mp4";
+    }
+    let i = 0;
+    function videoPlay(videoNum) {
+      document.getElementById("videoPlayer").setAttribute("src", videoSource[videoNum]);
+      document.getElementById("videoPlayer").load();
+      document.getElementById("videoPlayer").play();
+    }
+    document.getElementById('videoPlayer').addEventListener('ended', myHandler, false);
+    videoPlay(0);
+    function myHandler() {
+      i++;
+      if (i < videoSource.length) videoPlay(i);
+    }
+  }
+
+  function playPause() {
+    const player = document.getElementById("videoPlayer");
+    if (player.paused) { play(); } else { player.pause(); }
+  }
+</script>
+{% endblock %}

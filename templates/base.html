@@ -1,0 +1,431 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI-Powered ISL Communication Assistant</title>
+
+  <style>
+  /* ---- Theme Colors ---- */
+  :root {
+    --primary: #667eea;
+    --secondary: #764ba2;
+    --accent: #f093fb;
+    --success: #4facfe;
+    --warning: #43e97b;
+    --error: #fa709a;
+    --dark: #2d3748;
+    --light: #f7fafc;
+    --white: #ffffff;
+    --gray-100: #f7fafc;
+    --gray-200: #edf2f7;
+    --gray-300: #e2e8f0;
+    --gray-400: #cbd5e0;
+    --gray-500: #a0aec0;
+    --gray-600: #718096;
+    --gray-700: #4a5568;
+    --gray-800: #2d3748;
+    --gray-900: #1a202c;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: 16px;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    line-height: 1.6;
+    color: var(--gray-800);
+    background: var(--white);
+    overflow-x: hidden;
+  }
+
+  /* Header Styles */
+  .header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--gray-200);
+    z-index: 1000;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .header.scrolled {
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  }
+
+  .nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0.5rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: var(--primary);
+    text-decoration: none;
+    transition: transform 0.3s ease;
+  }
+
+  .logo:hover {
+    transform: scale(1.05);
+  }
+
+  .logo-icon {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+  }
+
+  .nav-links {
+    display: none;
+    gap: 2.5rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    text-decoration: none;
+    color: var(--gray-700);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    position: relative;
+    padding: 0.5rem 0;
+  }
+
+  .nav-links a:hover {
+    color: var(--primary);
+    transform: translateY(-2px);
+  }
+
+  .nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    transition: width 0.3s ease;
+    border-radius: 2px;
+  }
+
+  .nav-links a:hover::after {
+    width: 100%;
+  }
+
+  /* ---- Hamburger Nav ---- */
+  #nav-toggle { display: none; }
+  .hamburger {
+    display: block;
+    cursor: pointer;
+    padding: 4px 8px;
+    background: rgba(255, 255, 255, 0.95);
+    border: none;
+    position: absolute;
+    top: 6px;
+    right: 12px;
+    z-index: 1000;
+  }
+  .hamburger span {
+    display: block;
+    width: 24px;
+    height: 3px;
+    background: var(--primary);
+    margin: 4px 0;
+    border-radius: 2px;
+    transition: 0.4s;
+  }
+  /* Animate hamburger -> X */
+  #nav-toggle:checked ~ .hamburger span:nth-child(1) {
+    transform: rotate(-45deg) translate(-6px, 6px);
+  }
+  #nav-toggle:checked ~ .hamburger span:nth-child(2) { opacity: 0; }
+  #nav-toggle:checked ~ .hamburger span:nth-child(3) {
+    transform: rotate(45deg) translate(-6px, -6px);
+  }
+
+  /* ---- Dropdown Menu ---- */
+  #nav {
+    position: static;
+    background: none;
+    box-shadow: none;
+    max-height: none;
+    width: auto;
+    top: auto;
+    right: auto;
+    border-radius: 0;
+    display: none;
+  }
+  #nav-toggle:checked ~ #nav {
+    display: block;
+    position: absolute;
+    background: rgba(255, 255, 255, 0.95);
+    top: 48px;
+    right: 12px;
+    width: 220px;
+    max-height: 400px;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    transition: max-height 0.4s ease;
+  }
+  #nav li { border-bottom: 1px solid rgba(0,0,0,0.1); }
+  #nav li:last-child { border-bottom: none; }
+  #nav a {
+    display: block;
+    padding: 14px 18px;
+    color: var(--gray-700);
+    text-decoration: none;
+    font-weight: 600;
+    transition: background 0.3s, transform 0.2s;
+  }
+  #nav a:hover {
+    background: var(--primary);
+    color: white;
+    transform: translateX(5px);
+  }
+
+  /* ---- General Content Wrapper ---- */
+  .wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 30px;
+    min-height: 70vh;
+    animation: fadeIn 0.6s ease-in-out;
+    text-align: center;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Home Page Video ---- */
+  .wrapper video {
+    max-width: 600px;
+    width: 90%;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+    margin-bottom: 20px;
+  }
+
+  /* ---- Buttons ---- */
+  button, .start-btn, .submit {
+    background: var(--primary);
+    color: var(--text-light);
+    border: none;
+    padding: 14px 28px;
+    border-radius: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+  }
+  button:hover, .start-btn:hover, .submit:hover {
+    background: var(--primary-dark);
+    transform: scale(1.08);
+  }
+
+  /* ---- Animation Page Layout ---- */
+  .split-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 30px;
+    padding: 20px;
+    flex-wrap: wrap;   /* stack on small screens */
+  }
+
+  .split {
+    flex: 1;
+    min-width: 320px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  }
+
+  .split.left { order: 1; }
+  .split.right { order: 2; text-align: center; }
+
+  .split.right video {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  }
+
+  /* ---- Signup Form Styles ---- */
+  .signup-container {
+    background: #fff;
+    max-width: 420px;
+    margin: 40px auto;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    animation: fadeInUp 0.6s ease-in-out;
+    text-align: center;
+  }
+
+  .signup-title {
+    font-size: 26px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: var(--primary);
+  }
+
+  .signup-subtitle {
+    font-size: 15px;
+    color: #6b7280;
+    margin-bottom: 25px;
+  }
+
+  .signup-form input,
+  .signup-form select,
+  .signup-form textarea {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0 18px 0;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 15px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .signup-form input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 6px rgba(37, 99, 235, 0.3);
+    outline: none;
+  }
+  .form-errors {
+    color: #dc3545;
+    background: #f8d7da;
+    border: 1px solid #f5c2c7;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 12px;
+    font-size: 15px;
+  }
+
+
+  .signup-btn {
+    background: var(--primary);
+    color: var(--text-light);
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 8px;
+    font-size: 17px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .signup-btn:hover {
+    background: var(--primary-dark);
+    transform: scale(1.05);
+  }
+
+  .login-redirect {
+    margin-top: 18px;
+    font-size: 14px;
+    color: #4b5563;
+  }
+
+  .login-redirect a {
+    color: var(--primary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.3s;
+  }
+  .login-redirect a:hover {
+    color: var(--primary-dark);
+  }
+
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+
+  </style>
+</head>
+<body>
+<ul id="nav">
+  <li class="li"><a class="active" href="{% url 'home' %}">Home</a></li>
+  <li class="li"><a href="{% url 'animation' %}">Convertor</a></li>
+  <li class="li"><a href="{% url 'start_sign_detection' %}">Sign to Text Converter</a></li>
+  {% if not user.is_authenticated %}
+  <li class="li"><a href="{% url 'signup' %}">Sign Up</a></li>
+  {% endif %}
+  {% if user.is_authenticated %}
+  <li class="li"><a href="{% url 'logout' %}">Log-Out</a></li>
+  {% else %}
+    <li class="li"><a href="{% url 'login' %}">Log-in</a></li>
+  {% endif %}
+  <li class="li"><a href="{% url 'contact' %}">Contact</a></li>
+  <li class="li"><a href="{% url 'about' %}">About</a></li>
+</ul>
+>>>>>>> a592e39d (Updated ISL detection module, templates, and added new model files)
+
+  <header class="header">
+    <nav class="nav-container">
+      <a href="{% url 'home' %}" class="logo">
+        <div class="logo-icon">🤟</div>
+        AI-Powered ISL Communication Assistant
+      </a>
+
+      <input type="checkbox" id="nav-toggle" />
+      <label for="nav-toggle" class="hamburger">
+        <span></span>
+        <span></span>
+        <span></span>
+      </label>
+
+      <ul class="nav-links" id="nav">
+        <li><a href="{% url 'home' %}">Home</a></li>
+        <li><a href="{% url 'animation' %}">Converter</a></li>
+        {% if not user.is_authenticated %}
+          <li><a href="{% url 'signup' %}">Sign Up</a></li>
+        {% endif %}
+        {% if user.is_authenticated %}
+          <li><a href="{% url 'logout' %}">Log-Out</a></li>
+        {% else %}
+          <li><a href="{% url 'login' %}">Log-in</a></li>
+        {% endif %}
+        <li><a href="{% url 'contact' %}">Contact</a></li>
+        <li><a href="{% url 'about' %}">About</a></li>
+        <li><a href="{% url 'live' %}">Live</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <div class="wrapper">
+    {% block content %}
+    {% endblock %}
+  </div>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="isl-detection-container">
+    <h2>ISL Detection Interface</h2>
+    <div class="detection-status">
+        <div id="status-indicator" class="status-indicator active"></div>
+        <span id="status-text">ISL Detection Running</span>
+    </div>
+    
+    <div class="detection-info">
+        <p>The ISL detection system is now running and will display inline below.</p>
+        <p>Please position your hand in front of your camera to begin detecting sign language gestures.</p>
+    </div>
+
+    <div class="video-area" style="margin: 1rem 0; display:flex; justify-content:center;">
+        <img id="video-stream" src="{% url 'video_feed' %}" alt="ISL stream" style="max-width:100%; width:100%; border-radius:8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);" />
+    </div>
+    
+    <div class="detection-controls">
+        <button id="stop-detection" class="btn btn-danger">Stop Detection</button>
+    </div>
+</div>
+
+<style>
+    .isl-detection-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: var(--gray-100);
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .detection-status {
+        display: flex;
+        align-items: center;
+        margin: 1.5rem 0;
+    }
+    
+    .status-indicator {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background-color: var(--gray-400);
+        margin-right: 10px;
+    }
+    
+    .status-indicator.active {
+        background-color: var(--success);
+        box-shadow: 0 0 8px var(--success);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            box-shadow: 0 0 0 0 rgba(79, 172, 254, 0.7);
+        }
+        70% {
+            box-shadow: 0 0 0 10px rgba(79, 172, 254, 0);
+        }
+        100% {
+            box-shadow: 0 0 0 0 rgba(79, 172, 254, 0);
+        }
+    }
+    
+    .detection-info {
+        margin: 2rem 0;
+        line-height: 1.6;
+    }
+    
+    .detection-controls {
+        margin-top: 2rem;
+    }
+    
+    .btn-danger {
+        background-color: var(--error);
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-danger:hover {
+        background-color: #e05d7a;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Check if detection started successfully
+        const urlParams = new URLSearchParams(window.location.search);
+        const status = urlParams.get('status');
+        
+        if (status === 'failed') {
+            // Show error message
+            document.getElementById('status-indicator').classList.remove('active');
+            document.getElementById('status-indicator').style.backgroundColor = 'var(--error)';
+            document.getElementById('status-text').textContent = 'Failed to start ISL Detection';
+            
+            // Show alert
+            alert('Failed to start ISL Detection – Please try again.');
+        }
+        
+        // Handle stop button
+        document.getElementById('stop-detection').addEventListener('click', function() {
+            // Send request to stop the detection process
+            fetch('/stop-detection/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => {
+                window.location.href = "{% url 'home' %}";
+            })
+            .catch(error => {
+                console.error('Error stopping detection:', error);
+                window.location.href = "{% url 'home' %}";
+            });
+        });
+        
+        // Function to get CSRF token from cookies
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+    });
+</script>
+{% endblock %}
